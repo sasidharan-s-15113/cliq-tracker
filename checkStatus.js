@@ -1,10 +1,28 @@
 const axios = require("axios");
 
 const FIREBASE_URL = process.env.FIREBASE_URL;
-const CLIQ_TOKEN = process.env.CLIQ_TOKEN;
 const BOT_NAME = process.env.BOT_NAME;
 
+async function getAccessToken() {
+  const res = await axios.post(
+    "https://accounts.zoho.com/oauth/v2/token",
+    null,
+    {
+      params: {
+        refresh_token: process.env.REFRESH_TOKEN,
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
+        grant_type: "refresh_token",
+      },
+    }
+  );
+
+  return res.data.access_token;
+}
+
 async function checkStatus() {
+  const token = await getAccessToken(); // 🔥 auto-generated every run
+
   const res = await axios.get(FIREBASE_URL);
   const users = res.data;
 
@@ -17,7 +35,7 @@ async function checkStatus() {
       `https://cliq.zoho.com/api/v2/users/${user.target_email}`,
       {
         headers: {
-          Authorization: `Zoho-oauthtoken ${CLIQ_TOKEN}`,
+          Authorization: `Zoho-oauthtoken ${token}`,
         },
       }
     );
@@ -35,7 +53,7 @@ async function checkStatus() {
         },
         {
           headers: {
-            Authorization: `Zoho-oauthtoken ${CLIQ_TOKEN}`,
+            Authorization: `Zoho-oauthtoken ${token}`,
           },
         }
       );
@@ -52,7 +70,6 @@ async function checkStatus() {
 }
 
 checkStatus();
-
 
 async function getAccessToken() {
   const res = await axios.post(
