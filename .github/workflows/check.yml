@@ -1,1 +1,25 @@
+name: Check Status
 
+on:
+  schedule:
+    - cron: "* * * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - run: npm install axios
+
+      - run: node checkStatus.js
+        env:
+          FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
+          CLIQ_TOKEN: ${{ secrets.CLIQ_TOKEN }}
+          BOT_NAME: ${{ secrets.BOT_NAME }}
